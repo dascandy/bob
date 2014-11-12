@@ -1,0 +1,17 @@
+
+# Compile any CPP file to its corresponding O file
+src/(.*)\.cpp => obj/\1.o obj/\1.d
+  g++ -MMD -O2 -Wall -Wextra -std=c++11 -pthread -fomit-frame-pointer -Iinclude -c -o $@ $^ -g
+
+# Compile all objects together into the bob output file
+obj/.*\.o => bin/bob
+  g++ -o $@ $^ -lboost_filesystem -lboost_system -lre2 -pthread -g
+
+depfiles .*\.d
+
+bin/bob => all
+  echo -n
+
+bin/bob => install
+  rm /usr/bin/bob && cp bin/bob /usr/bin/bob
+
