@@ -3,9 +3,9 @@ bob
 
 Bob is a new build tool that follows the same philosophy as Make did when it was first designed, while not taking its design. As such it does not take along its syntax, its quirks, its portability issues nor does it support the tools that are built upon Make.
 
-Bob is based on the premise that building software really isn't that hard, and that the description to your computer should be about as long as the description to a knowledgeable software engineer. If the software engineer can understand it from 20 lines of description, the computer should not need much more than that - certainly not more than 200 as an absolute upper limit.
+Bob is based on the premise that building software really isn't that hard, and that the description to your computer should be about as long as the description to a knowledgeable software engineer. If the software engineer can understand it from 20 lines of description, the computer should not need much more than that - certainly not more than 200 as an absolute upper limit. 
 
-As software engineers there is little we value more than time and responsiveness, and Bob aims to do the least amount of work in the quickest possible way. Testruns on a software stack with 7000 source files result in it determining what to build within 3.4 seconds total, with rules complex enough to do full dependency analysis and that target multiple outputs, including checking for past outputs with a total of 250000 files checked.
+An additional limit is that the total build time for a giant project should not exceed a realistic amount of time for a developer to wait. As software engineers there is little we value more than time and responsiveness, and Bob aims to do the least amount of work in the quickest possible way. Testruns on a software stack with 7000 source files result in it determining what to build within 3.4 seconds total, with rules complex enough to do full dependency analysis and that target multiple outputs, including checking for past outputs with a total of 250000 files checked.
 
 Design
 ======
