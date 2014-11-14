@@ -8,6 +8,10 @@ void Rule::Match(File *file, std::vector<RuleInstance*> &rules, std::unordered_m
   try {
     std::string outputLine = replaceVars(replace_matches(this->outputLine, arg, '\\', inputMatcher.NumberOfCapturingGroups()), localVars);
     std::vector<std::string> outFiles = split(outputLine, ' ');
+    bool mainOutputIsOptional = (outFiles[0][0] == '[');
+    if (mainOutputIsOptional) {
+      outFiles[0] = outFiles[0].substr(1, outFiles[0].size() - 2);
+    }
     File *mainOutputFile = create_file(outFiles[0], fileMap, files);
     RuleInstance *&rule = mainOutputFile->generatingRule;
     if (!rule) {
@@ -15,6 +19,11 @@ void Rule::Match(File *file, std::vector<RuleInstance*> &rules, std::unordered_m
       rules.push_back(rule);
       mainOutputFile->generatingRule = rule;
       rule->mainOutput = mainOutputFile;
+      if (mainOutputIsOptional) {
+        rule->cacheOutputs.insert(mainOutputFile);
+      } else {
+        rule->outputs.insert(mainOutputFile);
+      }
       rule->command = replace_matches(command, arg, '\\', inputMatcher.NumberOfCapturingGroups());
 
       // If our build log is older than the output, it's not the result of that build. Better re-run it to make sure we don't give stale build output.

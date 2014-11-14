@@ -16,14 +16,9 @@ void RuleInstance::Invalidate() {
 }
 
 void RuleInstance::Check() {
-  if (verbose) printf("check %s ?\n", mainOutput->path.c_str());
+  if (verbose) printf("check for %s ?\n", mainOutput->path.c_str());
   if (command.empty()) {
     if (verbose) printf("Rebuilding; pseudotarget\n");
-    Invalidate();
-    return;
-  }
-  if (!boost::filesystem::is_regular_file(mainOutput->path)) {
-    if (verbose) printf("main output %s does not exist\n", mainOutput->path.c_str());
     Invalidate();
     return;
   }
@@ -65,7 +60,7 @@ void RuleInstance::Check() {
 }
 
 std::time_t RuleInstance::getOldestOutput() {
-  std::time_t oldestOutput = mainOutput->timestamp();
+  std::time_t oldestOutput = 0;
 
   for (File *f : outputs) {
     std::time_t t = f->timestamp();
@@ -100,6 +95,11 @@ bool RuleInstance::Run(std::mutex& m) {
     std::unordered_map<std::string, std::string> vars = rule->localVars;
     std::string cmd = command;
     vars["OUTPUT"] = mainOutput->path;
+    std::string out;
+    for (const auto &p : outputs) {
+      out += " " + p->path;
+    }
+    vars["OUTPUTS"] = out;
     std::string in = "";
     std::string inChanged = "";
     std::time_t oldestOutput = getOldestOutput();
@@ -130,9 +130,7 @@ bool RuleInstance::Run(std::mutex& m) {
     boost::filesystem::path logFile = boost::filesystem::path(mainOutput->path).parent_path() / (".out." + boost::filesystem::path(mainOutput->path).filename().string() + "._");
     if (dryrun) {
       rv = 0;
-    } else if (somethingToDo || storedRv == -1) {
-      boost::filesystem::path folder = boost::filesystem::path(mainOutput->path).parent_path();
-      if (!folder.empty()) boost::filesystem::create_directories(folder);
+    } else if (somethingToDo) {
       for (File *f : outputs) {
         boost::filesystem::path folder = boost::filesystem::path(f->path).parent_path();
         if (!folder.empty()) boost::filesystem::create_directories(folder);
@@ -170,7 +168,6 @@ bool RuleInstance::Run(std::mutex& m) {
     }
     if (somethingToDo && rv == 0) {
       std::lock_guard<std::mutex> lock(runnableM);
-      mainOutput->SignalRebuilt();
       for (File *f : outputs) {
         f->SignalRebuilt();
       }

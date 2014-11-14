@@ -316,7 +316,7 @@ int main(int, char **argv) {
             }
             if (r) {
               bool fail = r->Run(outputMutex);
-              if (fail) {
+              if (fail && !anyFail) {
                 anyFail = true;
                 printf("Failing build because building %s failed\n", r->mainOutput->path.c_str());
               }
