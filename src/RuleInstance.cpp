@@ -52,7 +52,16 @@ void RuleInstance::Check() {
   if (oldestOutput < youngestInput) {
     if (verbose) printf("oldest output is older than the newest input\n");
     Invalidate();
+    return;
   }
+
+  if (storedRv) {
+    if (verbose) printf("last build was not successful; have to rebuild\n");
+    Invalidate();
+    return;
+  }
+
+  if (verbose) printf("not rebuilding, all inputs up to date and no error on last run\n");
 }
 
 std::time_t RuleInstance::getOldestOutput() {
