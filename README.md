@@ -7,6 +7,21 @@ Bob is based on the premise that building software really isn't that hard, and t
 
 An additional limit is that the total build time for a giant project should not exceed a realistic amount of time for a developer to wait. As software engineers there is little we value more than time and responsiveness, and Bob aims to do the least amount of work in the quickest possible way. Testruns on a software stack with 7000 source files result in it determining what to build within 3.4 seconds total, with rules complex enough to do full dependency analysis and that target multiple outputs, including checking for past outputs with a total of 250000 files checked.
 
+Installing / Bootstrapping
+==========================
+
+To compile Bob, you need to have a working Bob install. As this is very unpractical for anybody starting to use it, there is a build.sh script that creates the same output. Run the build.sh script to create a 'bob' executable in the bin folder.
+
+To install bob, first compile it with the build.sh script and then run
+
+    sudo bin/bob install
+
+to install it to /usr/bin/bob. If you already have a working bob but want to upgrade (or downgrade) then run 
+
+    sudo bob install
+
+to install that version. 
+
 Design
 ======
 
