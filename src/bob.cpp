@@ -92,7 +92,9 @@ int main(int, char **argv) {
   std::unordered_map<std::string, File *> fileMap(524287);
   std::vector<RuleInstance *> instances;
   RE2::Options opts;
+#ifdef USE_NEWER_RE2_LIB
   opts.set_never_capture(true);
+#endif
   opts.set_one_line(true);
   RE2::Set ruleset(opts, RE2::ANCHOR_BOTH);
 
