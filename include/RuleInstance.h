@@ -7,9 +7,10 @@
 #include <unordered_map>
 #include <string>
 #include <mutex>
+#include <ctime>
 
 class Rule;
-class File;
+struct File;
 
 enum Relation { None, BuildBefore, IndirectInput, Input, GeneratingInput };
 

@@ -6,8 +6,8 @@
 #include "re2/re2.h"
 #include <vector>
 
-class File;
-class RuleInstance;
+struct File;
+struct RuleInstance;
 
 class Rule {
 public:

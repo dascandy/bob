@@ -23,6 +23,7 @@ bool deamon = false;
 bool client = false;
 bool testrun = false;
 size_t workerCount = std::thread::hardware_concurrency() + 1;
+const std::chrono::milliseconds onemillisec( 1 );
 
 struct entry {
   int32_t lastBuildResult;
@@ -321,14 +322,14 @@ int main(int, char **argv) {
                 printf("Failing build because building %s failed\n", r->mainOutput->path.c_str());
               }
             } else {
-              usleep(1000);
+              std::this_thread::sleep_for( onemillisec );
             }
           }
         }));
       }
-      usleep(1000);
+      std::this_thread::sleep_for( onemillisec );
       while (workersIdle != workers.size()) {
-        usleep(1000);
+        std::this_thread::sleep_for( onemillisec );
       }
       shouldStop = true;
       for (auto &t : workers) {

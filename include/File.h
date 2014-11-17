@@ -8,7 +8,7 @@
 #include <unordered_map>
 
 class Rule;
-class RuleInstance;
+struct RuleInstance;
 
 struct File {
   File(const std::string &path) 

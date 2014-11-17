@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-class RuleInstance;
+struct RuleInstance;
 
 extern std::unordered_set<RuleInstance*> runnable;
 extern std::mutex runnableM;

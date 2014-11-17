@@ -46,6 +46,7 @@ The syntax for rulefiles looks a lot like makefiles intentionally. The major dif
     #include <stdio.h>
     int main() {
       printf("Hello World!\n");
+      return 0;
     }
 
 To compile this, you would compile hello.c into an object file, and link the object file into an executable. The rulefile looks a lot like your manual instructions:
