@@ -144,17 +144,21 @@ void getFiles(std::vector<File *> &files) {
 }
 
 void File::Invalidate() {
-  shouldRebuild = true;
-  for (RuleInstance *d : dependencies) {
-    d->Invalidate();
+  if (!shouldRebuild) {
+    shouldRebuild = true;
+    for (RuleInstance *d : dependencies) {
+      d->Invalidate();
+    }
   }
 }
 
 void File::SignalRebuilt() {
-  shouldRebuild = false;
-  for (RuleInstance *d : dependencies) {
-    if (d->CanRun()) {
-      runnable.insert(d);
+  if (shouldRebuild) {
+    shouldRebuild = false;
+    for (RuleInstance *d : dependencies) {
+      if (d->CanRun()) {
+        runnable.insert(d);
+      }
     }
   }
 }

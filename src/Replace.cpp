@@ -32,9 +32,13 @@ std::string replaceVars(const std::string &arg, const std::unordered_map<std::st
     std::string function = outMiddleI.substr(0, posSpace);
     std::string argV = outMiddleI.substr(posSpace+1);
     if (function == "sub") {
-      // TODO
-      printf("Sub not implemented\n");
-      throw 1;
+      size_t pos1 = argV.find(",");
+      size_t pos2 = argV.find(",", pos1+1);
+      RE2 pattern(argV.substr(0, pos1));
+      std::string target = argV.substr(pos1+1, pos2-pos1-1);
+      std::string data = replaceVars(argV.substr(pos2+1), instancedVars);
+      while (RE2::Replace(&data, pattern, target)) { }
+      return outBase + data + replaceVars(outEnd, instancedVars);
     } else if (function == "filter") {
       size_t pos = argV.find(",");
       RE2 pattern(argV.substr(0, pos));
