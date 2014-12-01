@@ -7,11 +7,20 @@
 #include <thread>
 #include "re2/set.h"
 #include "Profile.h"
-static const int BOB_VERSION = 1;
+static const int BOB_VERSION = 2;
+
+static const RE2::Options &getopts() {
+  static RE2::Options opts;
+#ifndef WIN32
+  opts.set_never_capture(true);
+#endif
+  opts.set_one_line(true);
+  return opts;
+}
 
 std::unordered_set<RuleInstance*> runnable;
 std::mutex runnableM;
-RE2 *depfiles = NULL;
+RE2::Set depfiles(getopts(), RE2::ANCHOR_BOTH), generateds(getopts(), RE2::ANCHOR_BOTH);
 std::unordered_map<std::string, std::string> vars;
 std::string target = "all";
 bool clean = false;
@@ -91,12 +100,7 @@ int main(int, char **argv) {
   std::vector<File *> files;
   std::unordered_map<std::string, File *> fileMap(524287);
   std::vector<RuleInstance *> instances;
-  RE2::Options opts;
-#ifndef WIN32
-  opts.set_never_capture(true);
-#endif
-  opts.set_one_line(true);
-  RE2::Set ruleset(opts, RE2::ANCHOR_BOTH);
+  RE2::Set ruleset(getopts(), RE2::ANCHOR_BOTH);
 
   {
     PROFILE(Initial);
@@ -223,28 +227,49 @@ int main(int, char **argv) {
     if (verbose) printf("PROFILE: tried %lu files to match, %lu regex evaluations\n", fc, rcm);
   }
   // Load dependencies after matching the rules, as only dependencies for valid targets are taken into account
-  if (depfiles)
   {
     PROFILE(loading dependency files)
-    for (auto p : fileMap) {
-      loadDependenciesFrom(p.second->path, rules, fileMap, files);
+    if (!depfiles.Empty()) {
+      depfiles.Compile();
+      for (auto p : fileMap) {
+        loadDependenciesFrom(p.second->path, rules, fileMap, files);
+      }
     }
   }
-  // prune files that are irrelevant for building
+  // prune files that are irrelevant for building or stale
   {
     PROFILE(pruning irrelevant files)
-    for (auto it = fileMap.begin(); it != fileMap.end();) {
-      if (it->second->generatingRule == NULL) {
-        if (it->second->dependencies.empty()) {
-          it = fileMap.erase(it);
-        } else if (!boost::filesystem::is_regular_file(it->second->path)) {
-          printf("Found non-existant file %s\nrequired to build %s\n", it->second->path.c_str(), it->second->dependencies[0]->mainOutput->path.c_str());
-          ++it;
+    if (!generateds.Empty()) {
+      generateds.Compile();
+      for (auto it = fileMap.begin(); it != fileMap.end();) {
+        if (it->second->generatingRule == NULL) {
+          std::vector<int> v;
+          if (generateds.Match(it->second->path, &v)) {
+            // File is an input, but should have been generated and the source responsible for doing so is now gone
+            if (verbose) printf("Found stale generated output %s that does not have a generating source\n", it->second->path.c_str());
+            for (auto &dep : it->second->dependencies) {
+              dep->inputs.erase(it->second);
+            }
+            if (!dryrun)
+              boost::filesystem::remove(it->second->path);
+            delete it->second;
+            it = fileMap.erase(it);
+          } else if (it->second->dependencies.empty()) {
+            // File is not an input or output
+            delete it->second;
+            it = fileMap.erase(it);
+          } else if (!boost::filesystem::is_regular_file(it->second->path)) {
+            // File is an input (of sorts), but does not exist and won't be generated
+            // Do not print log typically, because dependency files get stale occasionally and this results in scary logging that's not relevant
+            if (verbose) printf("Found non-existant file %s\nrequired to build %s\n", it->second->path.c_str(), it->second->dependencies[0]->mainOutput->path.c_str());
+            ++it;
+          } else {
+            // File is just input
+            ++it;
+          }
         } else {
           ++it;
         }
-      } else {
-        ++it;
       }
     }
   }

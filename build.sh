@@ -8,5 +8,5 @@ g++ -pthread -MMD -O3 -Wall -Wextra -fno-omit-frame-pointer -std=c++11 -g -Iincl
 g++ -pthread -MMD -O3 -Wall -Wextra -fno-omit-frame-pointer -std=c++11 -g -Iinclude -c -o obj/Replace.o src/Replace.cpp -pg
 g++ -pthread -MMD -O3 -Wall -Wextra -fno-omit-frame-pointer -std=c++11 -g -Iinclude -c -o obj/RuleInstance.o src/RuleInstance.cpp -pg
 g++ -pthread -MMD -O3 -Wall -Wextra -fno-omit-frame-pointer -std=c++11 -g -Iinclude -c -o obj/String.o src/String.cpp -pg
-g++ -pthread -o bin/bob obj/bob.o obj/Rule.o obj/File.o obj/Replace.o obj/RuleInstance.o obj/String.o -lboost_filesystem -lboost_system libre2.a -pg
+g++ -pthread -o bin/bob obj/bob.o obj/Rule.o obj/File.o obj/Replace.o obj/RuleInstance.o obj/String.o -lboost_filesystem -lboost_system -lre2 -pg
 

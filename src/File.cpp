@@ -2,6 +2,7 @@
 #include <boost/filesystem/fstream.hpp>
 #include "Rule.h"
 #include "Funcs.h"
+#include "re2/set.h"
 #include "RuleInstance.h"
 
 File* create_file(const std::string &fileName, std::unordered_map<std::string, File*> &fileMap, std::vector<File *>& files) {
@@ -57,7 +58,13 @@ void readFile(std::vector<Rule *> &rules, const std::string &path, std::unordere
       std::unordered_map<std::string, std::string> localVars;
       instantiateRule(inputRegex, inputLine, outputLine, buffer, localVars, args, rules);
     } else if (line.substr(0, 8) == "depfiles") {
-      depfiles = new RE2(line.substr(9));
+      for (const auto& str : split(line.substr(9), ' ')) {
+        depfiles.Add(str, NULL);
+      }
+    } else if (line.substr(0, 9) == "generated") {
+      for (const auto& str : split(line.substr(10), ' ')) {
+        generateds.Add(str, NULL);
+      }
     } else if (line.substr(0, 7) == "include") {
       readFile(rules, line.substr(8), fileMap, files);
     } else if (line.substr(0, 4) == "each") {
@@ -127,10 +134,10 @@ bool readRuleFile(std::vector<Rule *> &rules, std::unordered_map<std::string, Fi
 
 void loadDependenciesFrom(std::string &file, std::vector<Rule*> &rules, std::unordered_map<std::string, File *> &fileMap, std::vector<File *> &files) {
   if (!boost::filesystem::is_regular_file(file)) return;
-  if (!RE2::FullMatch(file, *depfiles)) {
+  std::vector<int> m;
+  if (!depfiles.Match(file, &m)) {
     return;
   }
-  //printf("depfile %s\n", file.string().c_str());
   readFile(rules, file, fileMap, files);
 }
 

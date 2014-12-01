@@ -12,7 +12,7 @@ struct RuleInstance;
 
 extern std::unordered_set<RuleInstance*> runnable;
 extern std::mutex runnableM;
-extern RE2 *depfiles;
+extern RE2::Set depfiles, generateds;
 extern std::unordered_map<std::string, std::string> vars;
 extern std::string target;
 extern bool dryrun;
