@@ -27,7 +27,9 @@ void Rule::Match(File *file, std::vector<RuleInstance*> &rules, std::unordered_m
       rule->command = replace_matches(command, arg, '\\', inputMatcher.NumberOfCapturingGroups());
 
       // If our build log is older than the output, it's not the result of that build. Better re-run it to make sure we don't give stale build output.
-      File *logOutputFile = create_file(outFiles[0] + ".out", fileMap, files);
+      boost::filesystem::path outFile = outFiles[0];
+      boost::filesystem::path logFile = boost::filesystem::path(outFile).parent_path() / (".out." + boost::filesystem::path(outFile).filename().string() + "._");
+      File *logOutputFile = create_file(logFile.string(), fileMap, files);
       logOutputFile->generatingRule = rule;
       rule->cacheOutputs.insert(logOutputFile);
     }

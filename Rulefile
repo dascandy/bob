@@ -10,7 +10,7 @@ obj/.*\.o => bin/bob
 depfiles .*\.d
 
 bin/bob => all
-  echo -n
+
 
 bin/bob => install
   rm -f /usr/bin/bob && cp bin/bob /usr/bin/bob

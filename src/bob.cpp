@@ -7,7 +7,7 @@
 #include <thread>
 #include "re2/set.h"
 #include "Profile.h"
-static const int BOB_VERSION = 2;
+static const int BOB_VERSION = 3;
 
 static const RE2::Options &getopts() {
   static RE2::Options opts;

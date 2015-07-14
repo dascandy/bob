@@ -158,6 +158,16 @@ bool RuleInstance::Run(std::mutex& m) {
         printf("Error %d building %s: \n", rv, mainOutput->path.c_str());
       } else if (verbose && somethingToDo) {
         printf("Built %s successfully\n", mainOutput->path.c_str());
+        for (File *f : outputs) {
+          if (!boost::filesystem::is_regular_file(f->path)) {
+            printf("Rule did not result in actual output file after successful run: %s => %s\n", in.c_str(), f->path.c_str());
+          }
+        }
+        for (File *f : cacheOutputs) {
+          if (!boost::filesystem::is_regular_file(f->path)) {
+            printf("Rule did not result in actual output file after successful run: %s => %s\n", in.c_str(), f->path.c_str());
+          }
+        }
       } else if (boost::filesystem::is_regular_file(logFile) && !boost::filesystem::is_empty(logFile)) {
         printf("While building %s\n", mainOutput->path.c_str());
       }
