@@ -1,10 +1,13 @@
 #include "RuleInstance.h"
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "File.h"
 #include "Funcs.h"
 #include "Rule.h"
+#include <unistd.h>
+#include <errno.h>
 
 void RuleInstance::Invalidate() {
   somethingToDo = true;
@@ -80,8 +83,26 @@ bool RuleInstance::CanRun() {
   return true;
 }
 
-int execute_command(const std::string &cmd, const std::string &outfile) {
-  return system(("(" + cmd + ") >" + outfile + " 2>&1").c_str());
+static int execute_command(const std::string &cmd, const std::string &outfile = "") {
+  int pid = fork();
+  if (pid > 0) {
+    int status;
+    waitpid(pid, &status, 0);
+    return WEXITSTATUS(status);
+  } else if (pid == 0) {
+    if (outfile != "") {
+      int fd = open(outfile.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0755);
+      dup2(fd, 1);
+      close(fd);
+    }
+    close(0);
+    dup2(1, 2);
+    execl("/bin/bash", "/bin/bash", "-c", cmd.c_str(), 0);
+    exit(-1);
+  } else {
+    printf("fork fail\n");
+    return -1;
+  }
 }
 
 bool RuleInstance::Run(std::mutex& m) {
