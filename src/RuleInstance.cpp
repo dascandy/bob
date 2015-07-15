@@ -97,7 +97,7 @@ static int execute_command(const std::string &cmd, const std::string &outfile = 
     }
     close(0);
     dup2(1, 2);
-    execl("/bin/bash", "/bin/bash", "-c", cmd.c_str(), 0);
+    execlp("bash", "bash", "-c", cmd.c_str(), 0);
     exit(-1);
   } else {
     printf("fork fail\n");
