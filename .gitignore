@@ -13,12 +13,7 @@
 *.dylib
 *.dll
 
-# Fortran module files
-*.mod
-
 # Compiled Static libraries
-*.lai
-*.la
 *.a
 *.lib
 
@@ -26,3 +21,14 @@
 *.exe
 *.out
 *.app
+
+# BOB cache file
+.bob.cache
+
+# Output directories
+bin/
+obj/
+
+# To be removed again
+integtest/
+
