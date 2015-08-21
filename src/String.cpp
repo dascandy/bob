@@ -43,6 +43,19 @@ size_t find_end_brace_balanced(const std::string& arg, size_t pos) {
   return braces == 0 ? pos : arg.npos;
 }
 
+size_t find_first_owned_space(const std::string& arg) {
+  size_t pos = 0;
+  int braces = 0;
+  while (pos != arg.size()) {
+    if (arg[pos] == '(') braces++;
+    else if (arg[pos] == ')') braces--;
+    else if (arg[pos] == ' ' && braces == 0) 
+      return pos;
+    pos++;
+  }
+  return arg.npos;
+}
+
 std::string replace_with_pattern(const std::string& item, const RE2& pattern, const std::string& target) {
   RE2::Arg argv[10];
   const RE2::Arg* args[10] = {&argv[0], &argv[1], &argv[2], &argv[3], &argv[4], &argv[5], &argv[6], &argv[7], &argv[8], &argv[9]};

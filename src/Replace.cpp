@@ -14,7 +14,7 @@ std::string replaceVars(const std::string &arg, const std::unordered_map<std::st
   std::string outBase = arg.substr(0, pos),
               outEnd = arg.substr(posEndBrace),
               outMiddleI = arg.substr(pos+2, posEndBrace-pos-3);
-  size_t posSpace = outMiddleI.find_first_of(" ");
+  size_t posSpace = find_first_owned_space(outMiddleI);
   if (posSpace == outMiddleI.npos ||
       outMiddleI.find_first_not_of(" ", posSpace) == outMiddleI.npos) {
     std::string outMiddle = replaceVars(outMiddleI, instancedVars);
@@ -58,6 +58,7 @@ std::string replaceVars(const std::string &arg, const std::unordered_map<std::st
       std::string data = replaceVars(argV.substr(pos2+1), instancedVars);
       bool repeat = (function == "rep_subst");
       std::vector<std::string> items = split(data, ' ');
+      size_t loopCount = 500;
       do {
         std::vector<std::string> newItems;
         for (const auto &item : items) {
@@ -68,7 +69,6 @@ std::string replaceVars(const std::string &arg, const std::unordered_map<std::st
           }
         }
         if (repeat) {
-          size_t inputItems = items.size();
           items.clear();
           std::reverse(newItems.begin(), newItems.end());
           std::unordered_set<std::string> alreadyFound;
@@ -79,7 +79,8 @@ std::string replaceVars(const std::string &arg, const std::unordered_map<std::st
             }
           }
           std::reverse(items.begin(), items.end());
-          if (items.size() == inputItems) {
+          std::reverse(newItems.begin(), newItems.end());
+          if (items == newItems) {
             // TODO: this does not work quite entirely for non-cyclic dependencies, where this would stabilize but after this point.
             // To fix still; this doesn't help the cyclic case though and badly hurts performance for them.
             break;
@@ -87,7 +88,7 @@ std::string replaceVars(const std::string &arg, const std::unordered_map<std::st
         } else {
           swap(items, newItems);
         }
-      } while (repeat);
+      } while (repeat && loopCount--);
       data = "";
       for (const auto &i : items) {
         data += i + " ";

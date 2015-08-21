@@ -24,6 +24,7 @@ std::vector<std::string> split(const std::string&str, char splitToken);
 void replace_all(std::string &input, const char *toReplace, const std::string &replaceant);
 std::string replace_matches(const std::string &input, const std::string* matches, char prefix, size_t count);
 size_t find_end_brace_balanced(const std::string& arg, size_t pos);
+size_t find_first_owned_space(const std::string& arg);
 std::string replace_with_pattern(const std::string& item, const RE2& pattern, const std::string& target);
 
 #endif
