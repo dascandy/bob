@@ -229,47 +229,43 @@ int main(int, char **argv) {
   // Load dependencies after matching the rules, as only dependencies for valid targets are taken into account
   {
     PROFILE(loading dependency files)
-    if (!depfiles.Empty()) {
-      depfiles.Compile();
-      for (auto p : fileMap) {
-        loadDependenciesFrom(p.second->path, rules, fileMap, files);
-      }
+    depfiles.Compile();
+    for (auto p : fileMap) {
+      loadDependenciesFrom(p.second->path, rules, fileMap, files);
     }
   }
   // prune files that are irrelevant for building or stale
   {
     PROFILE(pruning irrelevant files)
-    if (!generateds.Empty()) {
-      generateds.Compile();
-      for (auto it = fileMap.begin(); it != fileMap.end();) {
-        if (it->second->generatingRule == NULL) {
-          std::vector<int> v;
-          if (generateds.Match(it->second->path, &v)) {
-            // File is an input, but should have been generated and the source responsible for doing so is now gone
-            if (verbose) printf("Found stale generated output %s that does not have a generating source\n", it->second->path.c_str());
-            for (auto &dep : it->second->dependencies) {
-              dep->inputs.erase(it->second);
-            }
-            if (!dryrun)
-              boost::filesystem::remove(it->second->path);
-            delete it->second;
-            it = fileMap.erase(it);
-          } else if (it->second->dependencies.empty()) {
-            // File is not an input or output
-            delete it->second;
-            it = fileMap.erase(it);
-          } else if (!boost::filesystem::is_regular_file(it->second->path)) {
-            // File is an input (of sorts), but does not exist and won't be generated
-            // Do not print log typically, because dependency files get stale occasionally and this results in scary logging that's not relevant
-            if (verbose) printf("Found non-existant file %s\nrequired to build %s\n", it->second->path.c_str(), it->second->dependencies[0]->mainOutput->path.c_str());
-            ++it;
-          } else {
-            // File is just input
-            ++it;
+    generateds.Compile();
+    for (auto it = fileMap.begin(); it != fileMap.end();) {
+      if (it->second->generatingRule == NULL) {
+        std::vector<int> v;
+        if (generateds.Match(it->second->path, &v)) {
+          // File is an input, but should have been generated and the source responsible for doing so is now gone
+          if (verbose) printf("Found stale generated output %s that does not have a generating source\n", it->second->path.c_str());
+          for (auto &dep : it->second->dependencies) {
+            dep->inputs.erase(it->second);
           }
+          if (!dryrun)
+            boost::filesystem::remove(it->second->path);
+          delete it->second;
+          it = fileMap.erase(it);
+        } else if (it->second->dependencies.empty()) {
+          // File is not an input or output
+          delete it->second;
+          it = fileMap.erase(it);
+        } else if (!boost::filesystem::is_regular_file(it->second->path)) {
+          // File is an input (of sorts), but does not exist and won't be generated
+          // Do not print log typically, because dependency files get stale occasionally and this results in scary logging that's not relevant
+          if (verbose) printf("Found non-existant file %s\nrequired to build %s\n", it->second->path.c_str(), it->second->dependencies[0]->mainOutput->path.c_str());
+          ++it;
         } else {
+          // File is just input
           ++it;
         }
+      } else {
+        ++it;
       }
     }
   }
