@@ -18,7 +18,7 @@ static const RE2::Options &getopts() {
   return opts;
 }
 
-std::unordered_set<RuleInstance*> runnable;
+std::priority_queue<RuleInstance*, std::vector<RuleInstance*>, Comparer> runnable;
 std::mutex runnableM;
 RE2::Set depfiles(getopts(), RE2::ANCHOR_BOTH), generateds(getopts(), RE2::ANCHOR_BOTH);
 std::unordered_map<std::string, std::string> vars;
@@ -317,7 +317,7 @@ int main(int, char **argv) {
     {
       PROFILE(spawning workers and building)
       for (RuleInstance *r : instances) {
-        if (r->CanRun()) runnable.insert(r);
+        if (r->CanRun()) runnable.push(r);
       }
       std::vector<std::thread*> workers;
       std::mutex outputMutex;
@@ -334,8 +334,8 @@ int main(int, char **argv) {
                 r = NULL;
               } else {
                 if (!r) workersIdle--;
-                r = *runnable.begin();
-                runnable.erase(runnable.begin());
+                r = runnable.top();
+                runnable.pop();
               }
             }
             if (r) {

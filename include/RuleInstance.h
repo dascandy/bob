@@ -23,8 +23,18 @@ struct RuleInstance {
   , storedRv(-1)
   , runningAverageTimeTaken(0)
   , runCount(0)
+	, cachedDelay(-1)
   {
   }
+	bool operator<(const RuleInstance &ri) const {
+		return GetDelay() < ri.GetDelay();
+	}
+	float GetDelay() const {
+		if (cachedDelay < 0) {
+
+		}
+		return cachedDelay;
+	}
   Rule *rule;
   std::time_t getOldestOutput();
   std::unordered_map<File*, Relation> inputs;
@@ -38,6 +48,7 @@ struct RuleInstance {
   int storedRv;
   std::chrono::nanoseconds runningAverageTimeTaken;
   size_t runCount;
+	mutable float cachedDelay;
   bool CanRun();
   bool Run(std::mutex&);
   void Check();

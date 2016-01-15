@@ -9,6 +9,10 @@
 #include <unistd.h>
 #include <errno.h>
 
+bool Comparer::operator()(RuleInstance* first, RuleInstance* second) {
+	return first->GetDelay() < second->GetDelay();
+}
+
 void RuleInstance::Invalidate() {
   somethingToDo = true;
   mainOutput->Invalidate();

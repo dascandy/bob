@@ -164,7 +164,7 @@ void File::SignalRebuilt() {
     shouldRebuild = false;
     for (RuleInstance *d : dependencies) {
       if (d->CanRun()) {
-        runnable.insert(d);
+        runnable.push(d);
       }
     }
   }

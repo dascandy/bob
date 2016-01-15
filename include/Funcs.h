@@ -7,10 +7,14 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
+#include <queue>
 
 struct RuleInstance;
+struct Comparer {
+	bool operator()(RuleInstance* first, RuleInstance* second);
+};
 
-extern std::unordered_set<RuleInstance*> runnable;
+extern std::priority_queue<RuleInstance*, std::vector<RuleInstance*>, Comparer> runnable;
 extern std::mutex runnableM;
 extern RE2::Set depfiles, generateds;
 extern std::unordered_map<std::string, std::string> vars;
