@@ -229,17 +229,14 @@ int main(int, char **argv) {
   // Load dependencies after matching the rules, as only dependencies for valid targets are taken into account
   {
     PROFILE(loading dependency files)
-    if (!depfiles.Empty()) {
       depfiles.Compile();
       for (auto p : fileMap) {
         loadDependenciesFrom(p.second->path, rules, fileMap, files);
       }
-    }
   }
   // prune files that are irrelevant for building or stale
   {
     PROFILE(pruning irrelevant files)
-    if (!generateds.Empty()) {
       generateds.Compile();
       for (auto it = fileMap.begin(); it != fileMap.end();) {
         if (it->second->generatingRule == NULL) {
@@ -271,7 +268,6 @@ int main(int, char **argv) {
           ++it;
         }
       }
-    }
   }
   {
     PROFILE(Loading previous run info)
