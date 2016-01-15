@@ -11,7 +11,7 @@
 
 struct RuleInstance;
 struct Comparer {
-	bool operator()(RuleInstance* first, RuleInstance* second);
+  bool operator()(RuleInstance* first, RuleInstance* second);
 };
 
 extern std::priority_queue<RuleInstance*, std::vector<RuleInstance*>, Comparer> runnable;

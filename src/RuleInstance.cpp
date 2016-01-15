@@ -10,7 +10,22 @@
 #include <errno.h>
 
 bool Comparer::operator()(RuleInstance* first, RuleInstance* second) {
-	return first->GetDelay() < second->GetDelay();
+  return first->GetDelay() < second->GetDelay();
+}
+
+uint64_t RuleInstance::GetDelay() const {
+  if (cachedDelay == 0) {
+    cachedDelay = runningAverageTimeTaken.count(); // Only for if there's a cycle
+    uint64_t curDelay = 0;
+    for (auto& out : outputs) {
+      for (auto& dep : out->dependencies) {
+        if (dep->wantToRun && dep->somethingToDo)
+          if (dep->GetDelay() > curDelay) curDelay = dep->GetDelay();
+      }
+    }
+    cachedDelay = curDelay + runningAverageTimeTaken.count();
+  }
+  return cachedDelay;
 }
 
 void RuleInstance::Invalidate() {
